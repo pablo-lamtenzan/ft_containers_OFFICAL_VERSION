@@ -6,21 +6,21 @@
 /*   By: pablo <pablo@student.42lyon.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/26 16:37:12 by pablo             #+#    #+#             */
-/*   Updated: 2020/12/26 20:36:42 by pablo            ###   ########lyon.fr   */
+/*   Updated: 2020/12/26 21:32:29 by pablo            ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
 # pragma once
 
 /*
+** Implemtation using a array with a block size who is *= 2
+** each time a new performed insertion is out of bounds.
+**
 ** Documentation: https://en.cppreference.com/w/cpp/container/vector
 */
 
 # include <allocator.hpp>
 # include "LegacyRandomAccessIterator.hpp"
-
-// A vector works like malloc: pre-allocates mem blocks to handle future grow (MUST DO IT)
-// 		for that check: capacity() and reserve()
 
 namespace ft
 {
@@ -50,28 +50,24 @@ namespace ft
 		size_type				curr_size;
 
 		/*
-		** Like a kind of realloc, if the current size is greather than the
-		** max size (capacity) it will create a new array and perform a deep copy
-		** of all the current elements stored in the current array.
+		** Like a kind of realloc, creates a new array and perform a deep copy
+		** of all the current elements stored in the current array (size of max_size).
 		**
-		** Note: Need to be called each time the curr_size is updated.
+		** Note: Need to be called each time the max size is updated
 		*/
 		void					array_reserve()
 		{
-			if (curr_size > max_size)
+			try {
+				pointer	new_array = memory.allocate(max_size);
+			} catch (const std::bad_alloc& e) { if (array) this->~vector(); throw ; }
+			for (size_type i = 0 ; i < curr_size ; i++)
 			{
-				try {
-					pointer	new_array = memory.allocate(curr_size);
-				} catch (const std::bad_alloc& e) { if (array) this->~vector(); throw ; }
-				for (size_type i = 0 ; i < curr_size ; i++)
-				{
-					// check if i m allowed to play God with std::move
-					new_array = std::move(array + i);
-					memory.destroy(array + i);
-				}
-				memory.deallocate(array);
-				array = new_array;
+				// check if i m allowed to play God with std::move
+				new_array = std::move(operator[](i));
+				memory.destroy(operator[](i));
 			}
+			memory.deallocate(array);
+			array = new_array;
 		}
 
 		/*
@@ -81,7 +77,7 @@ namespace ft
 		{
 			if (curr_size > max_size)
 			{
-				curr_size = max_size * 2;
+				max_size *= 2;
 				array_reserve();
 			}
 		}
@@ -111,7 +107,7 @@ namespace ft
 		~vector()
 		{
 			for (size_type i = 0 ; i < curr_size ; i++)
-				memory.destroy(array + i);
+				memory.destroy(&operator[](i));
 			memory.deallocate(array, max_size);
 		}
 
@@ -147,6 +143,12 @@ namespace ft
 		// to do
 
 			/* end */
+		// to do
+
+			/* rbegin */
+		// to do
+
+			/* rend */
 		// to do
 
 		/* Member functions: Capacity */
@@ -228,28 +230,47 @@ namespace ft
 	template <class T, class Allocator>
 	vector<T, Allocator>::reference				vector<T, Allocator>::at(size_type pos)
 	{
-		
+		if (!(pos < size))
+			throw std::out_of_range(std::string("Error: Out of bounds."));
+		return (operator[](pos));
 	}
 
 	/* At */
 	template <class T, class Allocator>
 	vector<T, Allocator>::const_reference		vector<T, Allocator>::at(size_type pos) const
 	{
-		
+		if (!(pos < size))
+			throw std::out_of_range(std::string("Error: Out of bounds"));
+		return (operator[](pos));
 	}
 
-	/* Front */
+	/* Operator[] */
 	template <class T, class Allocator>
 	vector<T, Allocator>::reference				vector<T, Allocator>::operator[](size_type pos)
 	{
+		return (array + pos);
+	}
+
+	/* Operator[] */
+	template <class T, class Allocator>
+	vector<T, Allocator>::const_reference		vector<T, Allocator>::operator[](size_type pos) const
+	{
+		return (array + pos);
+	}
+	
+	/* Front */
+	template <class T, class Allocator>
+	vector<T, Allocator>::reference				vector<T, Allocator>::back()
+	{
 		
+		return (operator[](0));
 	}
 
 	/* Front */
 	template <class T, class Allocator>
-	vector<T, Allocator>::const_reference		vector<T, Allocator>::operator[](size_type pos) const
+	vector<T, Allocator>::const_reference		vector<T, Allocator>::back() const
 	{
-		
+		return (operator[](0));
 	}
 	
 	/* Back */
@@ -257,13 +278,14 @@ namespace ft
 	vector<T, Allocator>::reference				vector<T, Allocator>::back()
 	{
 		
+		return (operator[](curr_size - 1));
 	}
 
 	/* Back */
 	template <class T, class Allocator>
 	vector<T, Allocator>::const_reference		vector<T, Allocator>::back() const
 	{
-		
+		return (operator[](curr_size - 1));
 	}
 
 	// TO DO begin
@@ -274,63 +296,76 @@ namespace ft
 	template <class T, class Allocator>
 	bool										vector<T, Allocator>::empty() const
 	{
-		
+		return (curr_size == 0);
 	}
 
 	/* Size */
 	template <class T, class Allocator>
 	vector<T, Allocator>::size_type				vector<T, Allocator>::size() const
 	{
-
+		return (curr_size);
 	}
 
 	/* Max size */
 	template <class T, class Allocator>
 	vector<T, Allocator>::size_type				vector<T, Allocator>::max_size() const
 	{
-
+		return (std::numeric_limits<size_type>::max() / sizeof(value_type));
 	}
 
 	/* Reserve */
 	template <class T, class Allocator>
 	void										vector<T, Allocator>::reserve(size_type new_cap)
 	{
-		
+		if (new_cap > max_size())
+			throw std::length_error(std::string("Error: Not enought physical memory in the device to perform this reserve allocation"))
+		max_size = new_cap;
+		array_reserve();
 	}
 
 	/* Capacity */
 	template <class T, class Allocator>
 	vector<T, Allocator>::size_type				vector<T, Allocator>::capacity() const
 	{
-		
+		return (max_size);
 	}
 
 	/* Clear */
 	template <class T, class Allocator>
 	void										vector<T, Allocator>::clear()
 	{
-		
+		while (curr_size-- < 0)
+			memory.destruct(&operator[](curr_size));
 	}
 
 	/* Push back */
 	template <class T, class Allocator>
 	void										vector<T, Allocator>::push_back(const_reference value)
 	{
-		
+		curr_size++;
+		array_resize();
+		operator[](curr_size) = value_type;
 	}
 
 	/* Pop back */
 	template <class T, class Allocator>
 	void										vector<T, Allocator>::pop_back()
 	{
-		
+		if (!empty())
+		{
+			curr_size--;
+			operator[](curr_size) = value_type;
+		}
 	}
 
 	/* Resize */
 	template <class T, class Allocator>
 	void										vector<T, Allocator>::resize(size_type count, value_type value = value_type())
 	{
-		
+		std::swap(curr_size, count);
+		array_resize();
+		for (size_type i = count ; i < max_size ; i++)
+			operator[](i) = value;
 	}
 
 	/* Booleans */
@@ -340,7 +375,7 @@ namespace ft
 	{
 		if (lhs.size() == rhs.size())
 		{
-			for (auto i = 0 ; i < lhs.size() < i++)
+			for (auto i = 0ul ; i < lhs.size() < i++)
 				if (lhs.operator[](i) != rhs.operator[](i))
 					return (false);
 			return (true);
