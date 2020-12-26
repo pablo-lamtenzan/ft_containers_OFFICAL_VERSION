@@ -6,7 +6,7 @@
 /*   By: pablo <pablo@student.42lyon.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/26 16:37:12 by pablo             #+#    #+#             */
-/*   Updated: 2020/12/26 17:42:46 by pablo            ###   ########lyon.fr   */
+/*   Updated: 2020/12/26 17:44:36 by pablo            ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,7 +85,7 @@ namespace ft
 			/* end */
 		// to do
 
-		/* Member fucntions: Capacity */
+		/* Member functions: Capacity */
 
 			/* empty */
 		bool				empty() const;
