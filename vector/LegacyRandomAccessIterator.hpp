@@ -6,7 +6,7 @@
 /*   By: pablo <pablo@student.42lyon.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/26 17:49:10 by pablo             #+#    #+#             */
-/*   Updated: 2020/12/27 14:37:07 by pablo            ###   ########lyon.fr   */
+/*   Updated: 2020/12/27 17:08:41 by pablo            ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,6 @@ namespace ft
 		typedef It								value_type;
 		typedef std::size_t						size_type;
 		typedef std::ptrdiff_t					difference_type;
-		// TO DO: (to change + more o add + remove the const)
 		typedef value_type&						reference;
 		typedef const value_type&				const_reference;
 		typedef value_type*						pointer;
@@ -62,15 +61,15 @@ namespace ft
 		/* Handle address addition */
 		LegacyRandomAccessIterator			operator+(difference_type n) { return (LegacyRandomAccessIterator(curr + n)); }
 		/* Handle integer addition with no const iterator */
-		//size_type							operator+() { }
+		size_type							operator+(LegacyRandomAccessIterator& other) { return ((static_cast<uint64_t>(curr) + static_cast<uint64_t>(other.curr)) / sizeof (size_type); }
 		/* Handle integer addtion with const iterator */
-		//size_type							operator+() { }
+		size_type							operator-(const LegacyRandomAccessIterator& other) { return ((static_cast<uint64_t>(curr) + static_cast<uint64_t>(other.curr)) / sizeof (size_type); }
 		/* Handle address substraction */
 		LegacyRandomAccessIterator			operator-(difference_type n) { return (LegacyRandomAccessIterator(curr - n)); }
 		/* Handle integer substraction with no const iterator */
-		//size_type							operator-() { }
+		size_type							operator-(LegacyRandomAccessIterator& other) { return ((static_cast<uint64_t>(curr) - static_cast<uint64_t>(other.curr)) / sizeof (size_type); }
 		/* Handle integer substraction with const iterator */
-		//size_type							operator-() { }
+		size_type							operator-(const LegacyRandomAccessIterator& other) { return (static_cast<uint64_t>(curr) - static_cast<uint64_t>(other.curr) / sizeof (size_type); }
 		/* Handle self addition */
 		LegacyRandomAccessIterator			operator+=(difference_type n) { curr += n; return (*this); }
 		/* Handle self substraction */
