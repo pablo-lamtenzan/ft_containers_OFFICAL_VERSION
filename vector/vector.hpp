@@ -6,7 +6,7 @@
 /*   By: pablo <pablo@student.42lyon.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/26 16:37:12 by pablo             #+#    #+#             */
-/*   Updated: 2020/12/27 15:31:34 by pablo            ###   ########lyon.fr   */
+/*   Updated: 2020/12/27 17:37:17 by pablo            ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,9 +19,11 @@
 ** Documentation: https://en.cppreference.com/w/cpp/container/vector
 */
 
+# include <cstring>
+
 # include <allocator.hpp>
 # include <lexicographical_compare.hpp>
-# include "LegacyRandomAccessIterator.hpp"
+# include <LegacyRandomAccessIterator.hpp>
 
 namespace ft
 {
@@ -51,20 +53,20 @@ namespace ft
 
 		Allocator				memory;
 		// To do change max size by anything else with a coherent name
-		size_type				max_size;
+		size_type				curr_capacity;
 		pointer					array;
 		size_type				curr_size;
 
 		/*
 		** Like a kind of realloc, creates a new array and perform a deep copy
-		** of all the current elements stored in the current array (size of max_size).
+		** of all the current elements stored in the current array (size of curr_capacity).
 		**
 		** Note: Need to be called each time the max size is updated
 		*/
 		void					array_reserve()
 		{
 			try {
-				pointer	new_array = memory.allocate(max_size);
+				pointer	new_array = memory.allocate(curr_capacity);
 			} catch (const std::bad_alloc& e) { if (array) this->~vector(); throw ; }
 			for (size_type i = 0 ; i < curr_size ; i++)
 			{
@@ -77,13 +79,13 @@ namespace ft
 		}
 
 		/*
-		** Duplicates the max_size and call array_reserve to perform the reallocation.
+		** Duplicates the curr_capacity and call array_reserve to perform the reallocation.
 		*/
 		void				array_resize()
 		{
-			if (curr_size > max_size)
+			if (curr_size > curr_capacity)
 			{
-				max_size *= 2;
+				curr_capacity *= 2;
 				array_reserve();
 			}
 		}
@@ -93,28 +95,28 @@ namespace ft
 		/* Member functions */
 
 			/* Constructor */
-		explicit vector(const Allocator& alloc = nullptr) : memory(alloc), max_size(0ul), array(nullptr), curr_size(0ul) { }
+		explicit vector(const Allocator& alloc = nullptr) : memory(alloc), curr_capacity(0ul), array(nullptr), curr_size(0ul) { }
 
 		explicit vector(size_type count, const_reference value = value_type(), const Allocator& alloc = Allocator())
-		: memory(alloc), max_size(count), curr_size(cout)
+		: memory(alloc), curr_capacity(count), curr_size(cout)
 		{
 			try {
-				array = memory.allocate(max_size);
+				array = memory.allocate(curr_capacity);
 			} catch (const std::bad_alloc& e) { throw ; }
-			for (size_type i = 0 ; i < max_size)
+			for (size_type i = 0 ; i < curr_capacity)
 				memory.construct(array + i, value);
 		}
 
 		template <class InputIt>
 		vector(InputIt first, InputIt last, const Allocator& alloc = Allocator())
-		: memory(alloc), max_size(0ul), array(nullptr), curr_size(0ul) { assign(first, last); }
+		: memory(alloc), curr_capacity(0ul), array(nullptr), curr_size(0ul) { assign(first, last); }
 
 			/* Destructor */
 		~vector()
 		{
 			for (size_type i = 0 ; i < curr_size ; i++)
 				memory.destroy(&operator[](i));
-			memory.deallocate(array, max_size);
+			memory.deallocate(array, curr_capacity);
 		}
 
 			/* Operator= */
@@ -208,14 +210,29 @@ namespace ft
 	template <class T, class Allocator>
 	vector<T, Allocator>&	vector<T, Allocator>::operator=(const vector<T, Allocator>& other)
 	{
-		
+		if (this != &other)
+		{
+			curr_capacity = other.capacity();
+			array_reserve();
+			std::memcpy(static_cast<void*>(array), static_cast<void*>(other.array), curr_capacity * sizeof(value_type));
+		}
+		return (*this);
 	}
 
 	/* Assign */
 	template <class T, class Allocator>
 	void					vector<T, Allocator>::assign(size_type count, const reference value)
 	{
-		
+		if (count > curr_capacity)
+		{
+			curr_capacity = curr_size = count;
+			array_reserve();
+		}
+		for (size_type i = 0 ; i < count ; i++)
+		{
+			memory.destroy(&operator[](i));
+			memory.construct(&operator[](i), value);
+		}
 	}
 
 	/* Assign */
@@ -223,7 +240,13 @@ namespace ft
 	template <class InputIt>
 	void					vector<T, Allocator>::assign(InputIt first, InputIt last)
 	{
-		
+		// This doesn't need a out of bounds check ?
+		while (first != last)
+		{
+			memory.destroy(first));
+			memory.construct(first, value);
+			first++;
+		}
 	}
 
 	/* At */
@@ -292,28 +315,28 @@ namespace ft
 	template <class T, class Allocator>
 	vector<T, Allocator>::iterator				vector<T, Allocator>::begin()
 	{
-		
+		return (iterator(&operator[](0)));
 	}
 
 	/* Begin */
 	template <class T, class Allocator>
-	vector<T, Allocator>::const_iterator				vector<T, Allocator>::begin() const
+	vector<T, Allocator>::const_iterator		vector<T, Allocator>::begin() const
 	{
-		
+		return (const_iterator(&operator[](0)));
 	}
 
 	/* End */
 	template <class T, class Allocator>
 	vector<T, Allocator>::iterator				vector<T, Allocator>::end()
 	{
-		
+		return (iterator(&operator[](curr_size)));
 	}
 
 	/* End */
 	template <class T, class Allocator>
 	vector<T, Allocator>::const_iterator				vector<T, Allocator>::begin() const
 	{
-		
+		return (const_iterator(&operator[](curr_size)));
 	}
 
 	/* Empty*/
@@ -343,7 +366,7 @@ namespace ft
 	{
 		if (new_cap > max_size())
 			throw std::length_error(std::string("Error: Not enought physical memory in the device to perform this reserve allocation"))
-		max_size = new_cap;
+		curr_capacity = new_cap;
 		array_reserve();
 	}
 
@@ -351,7 +374,7 @@ namespace ft
 	template <class T, class Allocator>
 	vector<T, Allocator>::size_type				vector<T, Allocator>::capacity() const
 	{
-		return (max_size);
+		return (curr_capacity);
 	}
 
 	/* Clear */
@@ -366,14 +389,40 @@ namespace ft
 	template <class T, class Allocator>
 	vector<T, Allocator>::iterator				vector<T, Allocator>::insert(iterator pos, const_reference value)
 	{
-		
+		insert(pos, 1, value);
 	}
 
 	/* Insert */
 	template <class T, class Allocator>
 	void										vector<T, Allocator>::insert(iterator pos, size_type count, const_reference value)
 	{
-		
+		// Handle space
+		curr_size += count;
+		if (curr_size > curr_capacity)
+		{
+			curr_capacity = curr_size;
+			array_reserve();
+		}
+
+		// Calc the insertion index
+		iterator i = begin();
+		size_type insertion_index = 0;
+		while (i != pos)
+		{
+			i++;
+			insertion_index++;
+		}
+
+		// Shift all "count" times to the left (starting at the insertion index)
+		for (size_type i = curr_size ; i > insertion_index ; i--)
+			std::move(operator[](i), operator[](i + count));
+
+		// Insert the value at the insertion index (size of count)
+		for (size_type i = insertion_index ; i < insertion_index + count ; i++)
+		{
+			// TO DO: Check if i have to destroy here
+			memory.construct(&operator[](i), value);
+		}
 	}
 
 	/* Insert */
@@ -381,21 +430,66 @@ namespace ft
 	template <class InputIt>
 	void										vector<T, Allocator>::insert(iterator pos, InputIt first, InputIt last)
 	{
-		
+		// Handle space
+		curr_size += last - first;
+		if (curr_size > curr_capacity)
+		{
+			curr_capacity = curr_size;
+			array_reserve();
+		}
+
+		// Calc the insertion index
+		iterator i = begin();
+		size_type insertion_index = 0;
+		while (i != pos)
+		{
+			i++;
+			insertion_index++;
+		}
+
+		// Shift all "last - first" times to the left (starting at the insertion index)
+		for (size_type i = curr_size ; i > insertion_index ; i--)
+			std::move(operator[](i), operator[](i + last - first));
+
+		// Insert the value at the insertion index (size of count)
+		for (size_type i = insertion_index ; i < insertion_index + ast - first ; i++)
+		{
+			// TO DO: Check if i have to destroy here
+			memory.construct(&operator[](i), value);
+		}
 	}
 
 	/* Erase */
 	template <class T, class Allocator>
 	vector<T, Allocator>::iterator				vector<T, Allocator>::erase(iterator pos)
 	{
-		
+		erase(pos, pos + 1);
 	}
 
 	/* Erase */
 	template <class T, class Allocator>
 	vector<T, Allocator>::iterator				vector<T, Allocator>::erase(iterator first, iterator last)
 	{
+		size_type	_size  = last - first;
+
+		// Calc the deletion index
+		iterator i = begin();
+		size_type deletion_index = 0;
+		while (i != pos)
+		{
+			i++;
+			deletion_index++;
+		}
+
+		// Perform the deletion starting at the deletion index (size of last - first)
+		for (size_type i = deletion_index ; i < deletion_index + _size ; i++)
+			memory.deltroy(&operator[](i));
 		
+		// Shift to the left the existing blocks after the deletion
+		for (size_type i = deletion_index + _size ; i < curr_size ; i++)
+			std::move(operator[](i), operator[](i - _size));
+
+		curr_size -= _size;
 	}
 
 	/* Push back */
@@ -412,10 +506,7 @@ namespace ft
 	void										vector<T, Allocator>::pop_back()
 	{
 		if (!empty())
-		{
-			curr_size--;
-			operator[](curr_size) = value_type;
-		}
+			operator[](--curr_size).value_type::~value_type();
 	}
 
 	/* Resize */
@@ -424,7 +515,7 @@ namespace ft
 	{
 		std::swap(curr_size, count);
 		array_resize();
-		for (size_type i = count ; i < max_size ; i++)
+		for (size_type i = count ; i < curr_capacity ; i++)
 			operator[](i) = value;
 	}
 
@@ -434,7 +525,7 @@ namespace ft
 	{
 		// Implement get or change to protected
 		std::swap(memory, other.memory);
-		std::swap(max_size, other.max_size);
+		std::swap(curr_capacity, other.curr_capacity);
 		std::swap(array, other.array);
 		std::swap(curr_size, other.curr_size);
 	}
