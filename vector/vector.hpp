@@ -6,7 +6,7 @@
 /*   By: pablo <pablo@student.42lyon.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/26 16:37:12 by pablo             #+#    #+#             */
-/*   Updated: 2020/12/26 21:32:29 by pablo            ###   ########lyon.fr   */
+/*   Updated: 2020/12/27 15:31:34 by pablo            ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 */
 
 # include <allocator.hpp>
+# include <lexicographical_compare.hpp>
 # include "LegacyRandomAccessIterator.hpp"
 
 namespace ft
@@ -31,20 +32,25 @@ namespace ft
 
 		/* Member types */
 
-		typedef T				value_type;
-		typedef std::size_t		size_type;
-		typedef std::ptrdiff_t	difference_type;
-		typedef T&				reference;
-		typedef const T&		const_reference;
-		typedef T*				pointer;
-		typedef const T*		const_pointer;
-		// TO DO: iterators
+		typedef T					value_type;
+		typedef std::size_t			size_type;
+		typedef std::ptrdiff_t		difference_type;
+		typedef value_type&			reference;
+		typedef const value_type&	const_reference;
+		typedef value_type*			pointer;
+		typedef const value_type*	const_pointer;
+	
+		typedef LegacyRandomAccessIterator<value_type>			iterator;
+		typedef LegacyRandomAccessIterator<const value_type>	const_iterator;
+		
+		// TO DO: reverse iterators
 
 		private:
 	
 		/* Core */
 
 		Allocator				memory;
+		// To do change max size by anything else with a coherent name
 		size_type				max_size;
 		pointer					array;
 		size_type				curr_size;
@@ -140,10 +146,12 @@ namespace ft
 		const_reference		back() const;
 
 			/* begin */
-		// to do
+		iterator			begin();
+		const_iterator		begin() const;
 
 			/* end */
-		// to do
+		iterator			end();
+		const_iterator		end() const;
 
 			/* rbegin */
 		// to do
@@ -174,10 +182,14 @@ namespace ft
 		void				clear();
 
 			/* insert */
-		// to do
+		iterator			insert(iterator pos, const_reference value);
+		void				insert(iterator pos, size_type count, const_reference value);
+		template <class InputIt>
+		void				insert(iterator pos, InputIt first, InputIt last);
 
 			/* erase */
-		// to do
+		iterator			erase(iterator pos);
+		iterator			erase(iterator first, iterator last);
 
 			/* Push_back */
 		void				push_back(const_reference value);
@@ -187,21 +199,9 @@ namespace ft
 
 			/* Resize */
 		void				resize(size_type count, value_type value = value_type());
-		
-		/* Non-member functions */
-		template <class T, class Alloc>
-		bool				operator==(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs);
-		template <class T, class Alloc>
-		bool				operator!=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs);
-		template <class T, class Alloc>
-		bool				operator<(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs);
-		template <class T, class Alloc>
-		bool				operator<=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs);
-		template <class T, class Alloc>
-		bool				operator>(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs);
-		template <class T, class Alloc>
-		bool				operator>=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs);
-		
+
+			/* Swap */
+		void				swap(vector& other);
 	};
 
 	/* Operator= */
@@ -288,9 +288,33 @@ namespace ft
 		return (operator[](curr_size - 1));
 	}
 
-	// TO DO begin
+	/* Begin */
+	template <class T, class Allocator>
+	vector<T, Allocator>::iterator				vector<T, Allocator>::begin()
+	{
+		
+	}
 
-	// TO DO end
+	/* Begin */
+	template <class T, class Allocator>
+	vector<T, Allocator>::const_iterator				vector<T, Allocator>::begin() const
+	{
+		
+	}
+
+	/* End */
+	template <class T, class Allocator>
+	vector<T, Allocator>::iterator				vector<T, Allocator>::end()
+	{
+		
+	}
+
+	/* End */
+	template <class T, class Allocator>
+	vector<T, Allocator>::const_iterator				vector<T, Allocator>::begin() const
+	{
+		
+	}
 
 	/* Empty*/
 	template <class T, class Allocator>
@@ -338,6 +362,42 @@ namespace ft
 			memory.destruct(&operator[](curr_size));
 	}
 
+	/* Insert */
+	template <class T, class Allocator>
+	vector<T, Allocator>::iterator				vector<T, Allocator>::insert(iterator pos, const_reference value)
+	{
+		
+	}
+
+	/* Insert */
+	template <class T, class Allocator>
+	void										vector<T, Allocator>::insert(iterator pos, size_type count, const_reference value)
+	{
+		
+	}
+
+	/* Insert */
+	template <class T, class Allocator>
+	template <class InputIt>
+	void										vector<T, Allocator>::insert(iterator pos, InputIt first, InputIt last)
+	{
+		
+	}
+
+	/* Erase */
+	template <class T, class Allocator>
+	vector<T, Allocator>::iterator				vector<T, Allocator>::erase(iterator pos)
+	{
+		
+	}
+
+	/* Erase */
+	template <class T, class Allocator>
+	vector<T, Allocator>::iterator				vector<T, Allocator>::erase(iterator first, iterator last)
+	{
+		
+	}
+
 	/* Push back */
 	template <class T, class Allocator>
 	void										vector<T, Allocator>::push_back(const_reference value)
@@ -368,6 +428,17 @@ namespace ft
 			operator[](i) = value;
 	}
 
+	/* Swap */
+	template <class T, class Allocator>
+	void										vector<T, Allocator>::swap(vector& other)
+	{
+		// Implement get or change to protected
+		std::swap(memory, other.memory);
+		std::swap(max_size, other.max_size);
+		std::swap(array, other.array);
+		std::swap(curr_size, other.curr_size);
+	}
+
 	/* Booleans */
 
 	template <class T, class Alloc>
@@ -392,7 +463,7 @@ namespace ft
 	template <class T, class Alloc>
 	bool				operator<(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
 	{
-		// think about it
+		return (lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()));
 	}
 
 	template <class T, class Alloc>
@@ -411,6 +482,12 @@ namespace ft
 	bool				operator>=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
 	{
 		return (!operator<(lhs, rhs));
+	}
+
+	template <class T, class Alloc>
+	void				swap(vector<T, Alloc>& a, vector<T, Alloc>& b)
+	{
+		a.swap(b);
 	}
 };
 

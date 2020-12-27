@@ -6,7 +6,7 @@
 /*   By: pablo <pablo@student.42lyon.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/26 17:49:10 by pablo             #+#    #+#             */
-/*   Updated: 2020/12/26 18:53:08 by pablo            ###   ########lyon.fr   */
+/*   Updated: 2020/12/27 14:37:07 by pablo            ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,14 +31,14 @@ namespace ft
 
 		/* Member types */
 
-		typedef It				value_type;
-		typedef std::size_t		size_type;
-		typedef std::ptrdiff_t	difference_type;
+		typedef It								value_type;
+		typedef std::size_t						size_type;
+		typedef std::ptrdiff_t					difference_type;
 		// TO DO: (to change + more o add + remove the const)
-		typedef It				reference;
-		typedef It				const_reference;
-		typedef It				pointer;
-		typedef It				const_pointer;
+		typedef value_type&						reference;
+		typedef const value_type&				const_reference;
+		typedef value_type*						pointer;
+		typedef const value_type*				const_pointer;
 		typedef std::bidirectional_iterator_tag	iterator_category;
 		
 		/* Iterator (current address in the array) */
@@ -54,11 +54,11 @@ namespace ft
 
 		LegacyRandomAccessIterator() : curr(nullptr) { }
 		LegacyRandomAccessIterator(pointer ptr) : curr(ptr) { }
-		//LegacyRandomAccessIterator() TO DO
+		LegacyRandomAccessIterator(const LegacyRandomAccessIterator& other) : curr(other.get_curr()) { }
 		~LegacyRandomAccessIterator() { }
 
 		/* Handle assignation */
-		//LegacyRandomAccessIterator&		operator=() { }
+		LegacyRandomAccessIterator&			operator=(const LegacyRandomAccessIterator& other) { curr = other.get_curr(); return (*this); }
 		/* Handle address addition */
 		LegacyRandomAccessIterator			operator+(difference_type n) { return (LegacyRandomAccessIterator(curr + n)); }
 		/* Handle integer addition with no const iterator */
@@ -84,26 +84,31 @@ namespace ft
 		/* Handle pre-decrementation */
 		LegacyRandomAccessIterator&			operator--() { curr--; return (*this); }
 		/* Handle self dereference by pointer */
-		reference							operator*() { if (!curr) throw::std::out_of_range(std::string("Error: Out of bounds.")); return (*this); }
+		reference							operator*() { if (!curr) throw::std::out_of_range(std::string("Error: Out of bounds.")); return (*curr); }
+		const_reference						operator*() const { if (!curr) throw::std::out_of_range(std::string("Error: Out of bounds.")); return (*curr); }
+		/* Handle pointing to self methods */
+		pointer								operator->() { return (curr); }
+		const_pointer						operator->() const { return (curr); }
 		/* Handle self dereference by squared brackets */
 		reference							operator[](difference_type pos) { return (curr + pos); }
+		const_reference						operator[](difference_type pos) const { return (curr + pos); }
 		/* Handle boolean equity */
 		template <class It1, class it2>
 		bool								operator==(const LegacyRandomAccessIterator<It1>& lhs, const LegacyRandomAccessIterator<It2>& rhs) { return (lhs.get_curr() == rhs.get_curr()); }
 		/* Handle boolean inequity */
 		template <class It1, class it2>
-		bool								operator==(const LegacyRandomAccessIterator<It1>& lhs, const LegacyRandomAccessIterator<It2>& rhs) { return (lhs.get_curr() != rhs.get_curr()); }
+		bool								operator!=(const LegacyRandomAccessIterator<It1>& lhs, const LegacyRandomAccessIterator<It2>& rhs) { return (lhs.get_curr() != rhs.get_curr()); }
 		/* Handle boolean leeser */
 		template <class It1, class it2>
-		bool								operator==(const LegacyRandomAccessIterator<It1>& lhs, const LegacyRandomAccessIterator<It2>& rhs) { return (lhs.get_curr() < rhs.get_curr()); }
+		bool								operator<(const LegacyRandomAccessIterator<It1>& lhs, const LegacyRandomAccessIterator<It2>& rhs) { return (lhs.get_curr() < rhs.get_curr()); }
 		/* Handle boolean leeser equity */
 		template <class It1, class it2>
-		bool								operator==(const LegacyRandomAccessIterator<It1>& lhs, const LegacyRandomAccessIterator<It2>& rhs) { return (lhs.get_curr() <= rhs.get_curr()); }
+		bool								operator<=(const LegacyRandomAccessIterator<It1>& lhs, const LegacyRandomAccessIterator<It2>& rhs) { return (lhs.get_curr() <= rhs.get_curr()); }
 		/* Hanlde boolean greather */
 		template <class It1, class it2>
-		bool								operator==(const LegacyRandomAccessIterator<It1>& lhs, const LegacyRandomAccessIterator<It2>& rhs) { return (lhs.get_curr() > rhs.get_curr()); }
+		bool								operator>(const LegacyRandomAccessIterator<It1>& lhs, const LegacyRandomAccessIterator<It2>& rhs) { return (lhs.get_curr() > rhs.get_curr()); }
 		/* Handle boolean greather equity */
 		template <class It1, class it2>
-		bool								operator==(const LegacyRandomAccessIterator<It1>& lhs, const LegacyRandomAccessIterator<It2>& rhs) { return (lhs.get_curr() >= rhs.get_curr()); }
+		bool								operator>=(const LegacyRandomAccessIterator<It1>& lhs, const LegacyRandomAccessIterator<It2>& rhs) { return (lhs.get_curr() >= rhs.get_curr()); }
 	};
 };
