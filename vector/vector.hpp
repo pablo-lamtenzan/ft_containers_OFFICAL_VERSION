@@ -6,7 +6,7 @@
 /*   By: pablo <pablo@student.42lyon.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/26 16:37:12 by pablo             #+#    #+#             */
-/*   Updated: 2020/12/27 17:37:17 by pablo            ###   ########lyon.fr   */
+/*   Updated: 2020/12/27 19:15:59 by pablo            ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,9 @@
 # include <cstring>
 
 # include <allocator.hpp>
-# include <lexicographical_compare.hpp>
 # include <LegacyRandomAccessIterator.hpp>
+# include <reverse_iterator.hpp>
+# include <lexicographical_compare.hpp>
 
 namespace ft
 {
@@ -44,15 +45,14 @@ namespace ft
 	
 		typedef LegacyRandomAccessIterator<value_type>			iterator;
 		typedef LegacyRandomAccessIterator<const value_type>	const_iterator;
-		
-		// TO DO: reverse iterators
+		typedef reverse_iterator<value_type>					reverse_iterator;
+		typedef reverse_iterator<const value_type>				const_reverse_iterator;
 
 		private:
 	
 		/* Core */
 
 		Allocator				memory;
-		// To do change max size by anything else with a coherent name
 		size_type				curr_capacity;
 		pointer					array;
 		size_type				curr_size;
@@ -156,10 +156,12 @@ namespace ft
 		const_iterator		end() const;
 
 			/* rbegin */
-		// to do
+		reverse_iterator	rbegin();
+		const_reverse_iterator	rbegin() const;
 
 			/* rend */
-		// to do
+		reverse_iterator	rend();
+		const_reverse_iterator	rend() const;
 
 		/* Member functions: Capacity */
 
@@ -334,9 +336,37 @@ namespace ft
 
 	/* End */
 	template <class T, class Allocator>
-	vector<T, Allocator>::const_iterator				vector<T, Allocator>::begin() const
+	vector<T, Allocator>::const_iterator		vector<T, Allocator>::end() const
 	{
 		return (const_iterator(&operator[](curr_size)));
+	}
+
+	/* Rbegin */
+	template <class T, class Allocator>
+	vector<T, Allocator>::reverse_iterator		vector<T, Allocator>::rbegin()
+	{
+		return(reverse_iterator(end()));
+	}
+
+	/* Rbegin */
+	template <class T, class Allocator>
+	vector<T, Allocator>::const_reverse_iterator	vector<T, Allocator>::rbegin() const
+	{
+		return(const_reverse_iterator(end()));
+	}
+
+	/* Rend */
+	template <class T, class Allocator>
+	vector<T, Allocator>::reverse_iterator		vector<T, Allocator>::rend()
+	{
+		return(reverse_iterator(begin()));
+	}
+
+	/* Rend */
+	template <class T, class Allocator>
+	vector<T, Allocator>::const_reverse_iterator	vector<T, Allocator>::rend() const
+	{
+		return(const_reverse_iterator(begin()));
 	}
 
 	/* Empty*/
