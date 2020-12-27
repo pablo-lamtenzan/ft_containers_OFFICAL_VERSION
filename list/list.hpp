@@ -6,7 +6,7 @@
 /*   By: pablo <pablo@student.42lyon.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/27 19:24:05 by pablo             #+#    #+#             */
-/*   Updated: 2020/12/27 20:55:06 by pablo            ###   ########lyon.fr   */
+/*   Updated: 2020/12/27 21:39:21 by pablo            ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -210,7 +210,7 @@ namespace ft
 		iterator				insert(iterator pos, const_reference value);
 		void					insert(iterator pos, size_type count, const_reference value);
 		template <class InputIt>
-		void					insert(iterator pos, InputIt first, Input last);
+		void					insert(iterator pos, InputIt first, InputIt last);
 
 			/* Erase */
 		iterator				erase(iterator pos);
@@ -281,10 +281,316 @@ namespace ft
 		bool					operator>=(const list<T, Alloc>& lhs, const list<T, Alloc>& rhs);
 	};
 
+	/* Operator= */
+	template <class T, class Allocator>
+	list<T, Allocator>&						list<T, Allocator>::operator=(const list& other)
+	{
+		
+	}
+	
+	/* Assign */
+	template <class T, class Allocator>
+	void									list<T, Allocator>::assign(size_type count, const_reference value)
+	{
+		
+	}
 
+	/* Assign */
+	template <class T, class Allocator>
+	template <class InputIt>
+	void									list<T, Allocator>::assign(InputIt first, InputIt last)
+	{
+		
+	}
 
+	/* Front */
+	template <class T, class Allocator>
+	list<T, Allocator>::reference			list<T, Allocator>::front()
+	{
+		
+	}
 
+	/* Front */
+	template <class T, class Allocator>
+	list<T, Allocator>::const_reference		list<T, Allocator>::front() const
+	{
+		
+	}
 
+	/* Back */
+	template <class T, class Allocator>
+	list<T, Allocator>::reference			list<T, Allocator>::back()
+	{
+		
+	}
+	
+	/* Back */
+	template <class T, class Allocator>
+	list<T, Allocator>::const_reference			list<T, Allocator>::back() const
+	{
+		
+	}
+
+	/* Begin */
+	template <class T, class Allocator>
+	list<T, Allocator>::iterator				list<T, Allocator>::begin()
+	{
+		
+	}
+
+	/* Begin */
+	template <class T, class Allocator>
+	list<T, Allocator>::const_iterator				list<T, Allocator>::begin() const
+	{
+		
+	}
+
+	/* End */
+	template <class T, class Allocator>
+	list<T, Allocator>::iterator				list<T, Allocator>::end()
+	{
+		
+	}
+
+	/* End */
+	template <class T, class Allocator>
+	list<T, Allocator>::const_iterator			list<T, Allocator>::end()
+	{
+		
+	}
+
+	/* Rbegin */
+	template <class T, class Allocator>
+	list<T, Allocator>::reverse_iterator		list<T, Allocator>::rbegin()
+	{
+		
+	}
+
+	/* Rbegin */
+	template <class T, class Allocator>
+	list<T, Allocator>::const_reverse_iterator	list<T, Allocator>::rbegin() const
+	{
+		
+	}
+
+	/* Rend */
+	template <class T, class Allocator>
+	list<T, Allocator>::reverse_iterator		list<T, Allocator>::rend()
+	{
+		
+	}
+
+	/* Rend */
+	template <class T, class Allocator>
+	list<T, Allocator>::const_reverse_iterator	list<T, Allocator>::rend() const
+	{
+		
+	}
+
+	/* Empty */
+	template <class T, class Allocator>
+	bool										list<T, Allocator>::empty() const
+	{
+		
+	}
+
+	/* Size */
+	template <class T, class Allocator>
+	list<T, Allocator>::size_type				list<T, Allocator>::size() const
+	{
+		
+	}
+
+	/* Max size */
+	template <class T, class Allocator>
+	list<T, Allocator>::size_type				list<T, Allocator>::max_size() const
+	{
+		
+	}
+
+	/* Clear */
+	template <class T, class Allocator>
+	void										list<T, Allocator>::clear()
+	{
+
+	}
+
+	/* Insert */
+	template <class T, class Allocator>
+	list<T, Allocator>::iterator				list<T, Allocator>::insert(iterator pos, const_reference value)
+	{
+		
+	}
+
+	/* Insert */
+	template <class T, class Allocator>
+	void										list<T, Allocator>::insert(iterator pos, size_type count, const_reference value)
+	{
+
+	}
+
+	/* Insert */
+	template <class T, class Allocator>
+	template <class InputIt>
+	void										list<T, Allocator>::insert(iterator pos, InputIt first, InputIt last)
+	{
+		
+	}
+
+	/* Erase */
+	template <class T, class Allocator>
+	list<T, Allocator>::iterator				list<T, Allocator>::erase(iterator pos)
+	{
+		
+	}
+
+	/* Erase */
+	template <class T, class Allocator>
+	list<T, Allocator>::iterator				list<T, Allocator>::erase(iterator firts, iterator last)
+	{
+		
+	}
+
+	/* Push back */
+	template <class T, class Allocator>
+	void										list<T, Allocator>::push_back(const_reference value)
+	{
+
+	}
+
+	/* Pop back */
+	template <class T, class Allocator>
+	void										list<T, Allocator>::pop_back()
+	{
+
+	}
+
+	/* Push front */
+	template <class T, class Allocator>
+	void										list<T, Allocator>::push_front(const_reference value)
+	{
+
+	}
+
+	/* Pop front */
+	template <class T, class Allocator>
+	void										list<T, Allocator>::pop_front()
+	{
+
+	}
+
+	/* Resize */
+	template <class T, class Allocator>
+	void										list<T, Allocator>::resize(size_type count)
+	{
+
+	}
+
+	/* Resize */
+	template <class T, class Allocator>
+	void										list<T, Allocator>::resize(size_type count, value_type value = value_type())
+	{
+
+	}
+
+	/* Swap */
+	template <class T, class Allocator>
+	void										list<T, Allocator>::swap(list& other)
+	{
+
+	}
+
+	/* Merge */
+	template <class T, class Allocator>
+	void										list<T, Allocator>::merge(list& other)
+	{
+
+	}
+
+	/* Merge */
+	template <class T, class Allocator>
+	template <class Compare>
+	void										list<T, Allocator>::merge(list& other, Compare comp)
+	{
+
+	}
+
+	/* Splice */
+	template <class T, class Allocator>
+	void										list<T, Allocator>::splice(const_iterator pos, list& other)
+	{
+
+	}
+
+	/* Splice */
+	template <class T, class Allocator>
+	void										list<T, Allocator>::splice(const_iterator pos, list& other, const_iterator it)
+	{
+
+	}
+	
+	/* Splice */
+	template <class T, class Allocator>
+	void										list<T, Allocator>::splice(const_iterator pos, list& other, const_iterator first, const_iterator last)
+	{
+
+	}
+	
+	/* Remove */
+	template <class T, class Allocator>
+	void										list<T, Allocator>::remove(const_reference value)
+	{
+
+	}
+
+	/* Remove if */
+	template <class T, class Allocator>
+	template <class UnaryPredicate>
+	void										list<T, Allocator>::remove_if(UnaryPredicate p)
+	{
+
+	}
+
+	/* Reverse */
+	template <class T, class Allocator>
+	void										list<T, Allocator>::reverse()
+	{
+
+	}
+
+	/* Unique */
+	template <class T, class Allocator>
+	void										list<T, Allocator>::unique()
+	{
+
+	}
+
+	/* Unique */
+	template <class T, class Allocator>
+	template <class BinaryPredicate>
+	void										list<T, Allocator>::unique(BinaryPredicate p)
+	{
+
+	}
+
+	/* Sort */
+	template <class T, class Allocator>
+	void										list<T, Allocator>::sort()
+	{
+
+	}
+
+	/* Sort */
+	template <class T, class Allocator>
+	template <class Compare>
+	void										list<T, Allocator>::sort(Compare comp)
+	{
+		
+	}
+
+	/* Non-member booleans */
+
+	// To define (need research about how declare them)
 
 
 	/* Non-member swap */
