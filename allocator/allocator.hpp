@@ -6,11 +6,11 @@
 /*   By: pablo <pablo@student.42lyon.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/26 15:26:51 by pablo             #+#    #+#             */
-/*   Updated: 2020/12/26 16:33:52 by pablo            ###   ########lyon.fr   */
+/*   Updated: 2021/01/05 12:07:57 by pablo            ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
-#pragma once
+# pragma once
 
 /*
 ** Documentation: https://en.cppreference.com/w/cpp/memory/allocator
@@ -29,13 +29,13 @@ namespace ft
 
 		/* Member types */
 
-		typedef T				value_type;
-		typedef T*				pointer;
-		typedef const T*		const_pointer;
-		typedef T&				reference;
-		typedef const T&		const_reference;
-		typedef std::size_t		size_type;
-		typedef difference_type	std::ptrdiff_t;
+		typedef T					value_type;
+		typedef value_type*			pointer;
+		typedef const value_type*	const_pointer;
+		typedef value_type&			reference;
+		typedef const value_type&	const_reference;
+		typedef std::size_t			size_type;
+		typedef std::ptrdiff_t		difference_type;
 
 		template <class U>
 		struct rebind { typedef allocator<U> other; };
@@ -60,22 +60,25 @@ namespace ft
 			pointer alloc;
 
 			try {
-				alloc = (pointer)(::operator new(n * sizeof(value_type));
+				alloc = (pointer)(::operator new(n * sizeof(value_type)));
 			} catch (const std::bad_alloc& e) { std::cerr << e.what() << std::endl; throw std::bad_alloc(); }
 
 			return (alloc);
 		}
 
-		void		deallocate(pointer p, size_type n) { ::operator delete((void*)p, n); }
+		void		deallocate(pointer p, size_type n) { (void)n, ::operator delete(static_cast<void*>(p)); }
 		size_type	max_size() const throw() { return (std::numeric_limits<size_type>::max() / sizeof(value_type)); }
-		void		contruct(pointer p, const_reference val) { new (void*)p value_type(val); }
+		void		contruct(pointer p, const_reference val) { new ((void*)p)value_type(val); }
 		void		destroy(pointer p) { ((pointer)p)->~value_type(); };
 
 		/* Non-member functions */
 
+		// TO DO: Use friend here (subject says)
+		/*
 		template <class T1, class T2>
 		bool		operator==(const allocator<T1>& lhs, const allocator<T2>& rhs) throw() { return (&lhs == &rhs); }
 		template <class T1, class T2>
 		bool		operator!=(const allocator<T1>& lhs, const allocator<T2>& rhs) throw() { return (&lhs != &rhs); }
+		*/
 	};
 };
