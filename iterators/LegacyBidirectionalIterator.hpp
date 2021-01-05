@@ -6,7 +6,7 @@
 /*   By: pablo <pablo@student.42lyon.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/28 15:15:52 by pablo             #+#    #+#             */
-/*   Updated: 2020/12/28 17:49:57 by pablo            ###   ########lyon.fr   */
+/*   Updated: 2021/01/05 09:08:46 by pablo            ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 
 # include <cstddef>
 # include <exception>
+# include <allocator.hpp>
 
 namespace ft
 {
@@ -27,29 +28,39 @@ namespace ft
 	**
 	** Note: prev and next must be redifined to NIL after it use of all the functional nodes.
 	*/
-	template <class T>
+	template <class T, class Allocator = allocator<T>>
 	struct Node
 	{
 		typedef	T		value_type;
 
+		Allocator		memory;
 		value_type		data;
 		Node*			prev;
 		Node*			next;
 
-		Node() { }
 		Node(Node* p = nullptr, Node* n = nullptr,  const value_type& d = value_type()) : data(d), prev(p), next(n)
 		{
 			Node*	node;
 			try {
 				node = memory.allocate(sizeof(*node));
+				memory.construct(&node->data, d);
 			} catch (std::bad_alloc& e) { throw std::bad_alloc(); }
-			*node = (Node){.data=d, .prev=p, .next=n};
+			*this = node;
 		}
+
+		~Node()
+		{
+			memory.destroy(&data);
+			memory.deallocate(this, sizeof(*this));
+		}
+
+		Node(const Node& other) { operator=(other); }
 		
 		Node&	operator=(const Node& other)
 		{
 			if (this != &src)
 			{
+				// TO DO: Not sure about the deepness of the copy
 				data = other.data;
 				prev = other.prev;
 				next = other.next;
