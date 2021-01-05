@@ -6,7 +6,7 @@
 /*   By: pablo <pablo@student.42lyon.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/26 16:37:12 by pablo             #+#    #+#             */
-/*   Updated: 2020/12/27 19:15:59 by pablo            ###   ########lyon.fr   */
+/*   Updated: 2021/01/05 11:40:56 by pablo            ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,10 +21,10 @@
 
 # include <cstring>
 
-# include <allocator.hpp>
-# include <LegacyRandomAccessIterator.hpp>
-# include <reverse_iterator.hpp>
-# include <lexicographical_compare.hpp>
+# include "../allocator/allocator.hpp"
+# include "../iterators/LegacyRandomAccessIterator.hpp"
+# include "../iterators/reverse_iterator.hpp"
+# include "../lexicographical_compare.hpp"
 
 namespace ft
 {
@@ -45,8 +45,8 @@ namespace ft
 	
 		typedef LegacyRandomAccessIterator<value_type>			iterator;
 		typedef LegacyRandomAccessIterator<const value_type>	const_iterator;
-		typedef reverse_iterator<value_type>					reverse_iterator;
-		typedef reverse_iterator<const value_type>				const_reverse_iterator;
+		typedef reverse_iterator<const_iterator>				const_reverse_iterator;
+		typedef reverse_iterator<iterator>						reverse_iterator;
 
 		private:
 	
@@ -65,8 +65,9 @@ namespace ft
 		*/
 		void					array_reserve()
 		{
+			pointer	new_array;
 			try {
-				pointer	new_array = memory.allocate(curr_capacity);
+				new_array = memory.allocate(curr_capacity);
 			} catch (const std::bad_alloc& e) { if (array) this->~vector(); throw ; }
 			for (size_type i = 0 ; i < curr_size ; i++)
 			{
@@ -83,9 +84,10 @@ namespace ft
 		*/
 		void				array_resize()
 		{
-			if (curr_size > curr_capacity)
+			if (curr_capacity < curr_size)
 			{
-				curr_capacity *= 2;
+				while (curr_capacity < curr_size)
+					curr_capacity = curr_capacity << 1ul;
 				array_reserve();
 			}
 		}
@@ -95,21 +97,29 @@ namespace ft
 		/* Member functions */
 
 			/* Constructor */
-		explicit vector(const Allocator& alloc = nullptr) : memory(alloc), curr_capacity(0ul), array(nullptr), curr_size(0ul) { }
+		explicit vector(const Allocator& alloc = Allocator()) : memory(alloc), curr_capacity(0ul), array(NULL), curr_size(0ul) { }
 
 		explicit vector(size_type count, const_reference value = value_type(), const Allocator& alloc = Allocator())
-		: memory(alloc), curr_capacity(count), curr_size(cout)
+		: memory(alloc), curr_size(count)
 		{
+			// Define the capacity
+			curr_capacity = 1;
+			while (curr_capacity < curr_size)
+				curr_capacity = curr_capacity << 1ul;
+
+			// Allocate the array
 			try {
 				array = memory.allocate(curr_capacity);
 			} catch (const std::bad_alloc& e) { throw ; }
-			for (size_type i = 0 ; i < curr_capacity)
-				memory.construct(array + i, value);
+
+			// Contruct the array
+			for (size_type i = 0 ; i < curr_capacity ; i++)
+				memory.construct(operator[](i), value);
 		}
 
 		template <class InputIt>
 		vector(InputIt first, InputIt last, const Allocator& alloc = Allocator())
-		: memory(alloc), curr_capacity(0ul), array(nullptr), curr_size(0ul) { assign(first, last); }
+		: memory(alloc), curr_capacity(0ul), array(NULL), curr_size(0ul) { assign(first, last); }
 
 			/* Destructor */
 		~vector()
@@ -123,7 +133,7 @@ namespace ft
 		vector&		operator=(const vector& other);
 
 			/* Assign */
-		void		assign(size_type count, const reference value);
+		void		assign(size_type count, const_reference value);
 		template <class InputIt>
 		void		assign(InputIt first, InputIt last);
 
@@ -223,12 +233,12 @@ namespace ft
 
 	/* Assign */
 	template <class T, class Allocator>
-	void					vector<T, Allocator>::assign(size_type count, const reference value)
+	void					vector<T, Allocator>::assign(size_type count, const_reference value)
 	{
 		if (count > curr_capacity)
 		{
-			curr_capacity = curr_size = count;
-			array_reserve();
+			curr_size = count;
+			array_resize();
 		}
 		for (size_type i = 0 ; i < count ; i++)
 		{
@@ -245,47 +255,47 @@ namespace ft
 		// This doesn't need a out of bounds check ?
 		while (first != last)
 		{
-			memory.destroy(first));
-			memory.construct(first, value);
+			memory.destroy(first);
+			//memory.construct(first, value);
 			first++;
 		}
 	}
 
 	/* At */
 	template <class T, class Allocator>
-	vector<T, Allocator>::reference				vector<T, Allocator>::at(size_type pos)
+	typename vector<T, Allocator>::reference		vector<T, Allocator>::at(size_type pos)
 	{
-		if (!(pos < size))
+		if (!(pos < size()))
 			throw std::out_of_range(std::string("Error: Out of bounds."));
 		return (operator[](pos));
 	}
 
 	/* At */
 	template <class T, class Allocator>
-	vector<T, Allocator>::const_reference		vector<T, Allocator>::at(size_type pos) const
+	typename vector<T, Allocator>::const_reference	vector<T, Allocator>::at(size_type pos) const
 	{
-		if (!(pos < size))
+		if (!(pos < size()))
 			throw std::out_of_range(std::string("Error: Out of bounds"));
 		return (operator[](pos));
 	}
 
 	/* Operator[] */
 	template <class T, class Allocator>
-	vector<T, Allocator>::reference				vector<T, Allocator>::operator[](size_type pos)
+	typename vector<T, Allocator>::reference		vector<T, Allocator>::operator[](size_type pos)
 	{
-		return (array + pos);
+		return (array[pos]);
 	}
 
 	/* Operator[] */
 	template <class T, class Allocator>
-	vector<T, Allocator>::const_reference		vector<T, Allocator>::operator[](size_type pos) const
+	typename vector<T, Allocator>::const_reference	vector<T, Allocator>::operator[](size_type pos) const
 	{
-		return (array + pos);
+		return (array[pos]);
 	}
 	
 	/* Front */
 	template <class T, class Allocator>
-	vector<T, Allocator>::reference				vector<T, Allocator>::back()
+	typename vector<T, Allocator>::reference		vector<T, Allocator>::front()
 	{
 		
 		return (operator[](0));
@@ -293,14 +303,14 @@ namespace ft
 
 	/* Front */
 	template <class T, class Allocator>
-	vector<T, Allocator>::const_reference		vector<T, Allocator>::back() const
+	typename vector<T, Allocator>::const_reference	vector<T, Allocator>::front() const
 	{
 		return (operator[](0));
 	}
 	
 	/* Back */
 	template <class T, class Allocator>
-	vector<T, Allocator>::reference				vector<T, Allocator>::back()
+	typename vector<T, Allocator>::reference		vector<T, Allocator>::back()
 	{
 		
 		return (operator[](curr_size - 1));
@@ -308,63 +318,63 @@ namespace ft
 
 	/* Back */
 	template <class T, class Allocator>
-	vector<T, Allocator>::const_reference		vector<T, Allocator>::back() const
+	typename vector<T, Allocator>::const_reference	vector<T, Allocator>::back() const
 	{
 		return (operator[](curr_size - 1));
 	}
 
 	/* Begin */
 	template <class T, class Allocator>
-	vector<T, Allocator>::iterator				vector<T, Allocator>::begin()
+	typename vector<T, Allocator>::iterator			vector<T, Allocator>::begin()
 	{
 		return (iterator(&operator[](0)));
 	}
 
 	/* Begin */
 	template <class T, class Allocator>
-	vector<T, Allocator>::const_iterator		vector<T, Allocator>::begin() const
+	typename vector<T, Allocator>::const_iterator	vector<T, Allocator>::begin() const
 	{
 		return (const_iterator(&operator[](0)));
 	}
 
 	/* End */
 	template <class T, class Allocator>
-	vector<T, Allocator>::iterator				vector<T, Allocator>::end()
+	typename vector<T, Allocator>::iterator			vector<T, Allocator>::end()
 	{
-		return (iterator(&operator[](curr_size)));
+		return (iterator(&operator[](curr_size - 1)));
 	}
 
 	/* End */
 	template <class T, class Allocator>
-	vector<T, Allocator>::const_iterator		vector<T, Allocator>::end() const
+	typename vector<T, Allocator>::const_iterator	vector<T, Allocator>::end() const
 	{
-		return (const_iterator(&operator[](curr_size)));
+		return (const_iterator(&operator[](curr_size - 1)));
 	}
 
 	/* Rbegin */
 	template <class T, class Allocator>
-	vector<T, Allocator>::reverse_iterator		vector<T, Allocator>::rbegin()
+	typename vector<T, Allocator>::reverse_iterator	vector<T, Allocator>::rbegin()
 	{
 		return(reverse_iterator(end()));
 	}
 
 	/* Rbegin */
 	template <class T, class Allocator>
-	vector<T, Allocator>::const_reverse_iterator	vector<T, Allocator>::rbegin() const
+	typename vector<T, Allocator>::const_reverse_iterator	vector<T, Allocator>::rbegin() const
 	{
 		return(const_reverse_iterator(end()));
 	}
 
 	/* Rend */
 	template <class T, class Allocator>
-	vector<T, Allocator>::reverse_iterator		vector<T, Allocator>::rend()
+	typename vector<T, Allocator>::reverse_iterator			vector<T, Allocator>::rend()
 	{
 		return(reverse_iterator(begin()));
 	}
 
 	/* Rend */
 	template <class T, class Allocator>
-	vector<T, Allocator>::const_reverse_iterator	vector<T, Allocator>::rend() const
+	typename vector<T, Allocator>::const_reverse_iterator	vector<T, Allocator>::rend() const
 	{
 		return(const_reverse_iterator(begin()));
 	}
@@ -378,14 +388,14 @@ namespace ft
 
 	/* Size */
 	template <class T, class Allocator>
-	vector<T, Allocator>::size_type				vector<T, Allocator>::size() const
+	typename vector<T, Allocator>::size_type	vector<T, Allocator>::size() const
 	{
 		return (curr_size);
 	}
 
 	/* Max size */
 	template <class T, class Allocator>
-	vector<T, Allocator>::size_type				vector<T, Allocator>::max_size() const
+	typename vector<T, Allocator>::size_type	vector<T, Allocator>::max_size() const
 	{
 		return (std::numeric_limits<size_type>::max() / sizeof(value_type));
 	}
@@ -394,15 +404,16 @@ namespace ft
 	template <class T, class Allocator>
 	void										vector<T, Allocator>::reserve(size_type new_cap)
 	{
+		// TO DO: check if that operation still follow cap = cap ^ n
 		if (new_cap > max_size())
-			throw std::length_error(std::string("Error: Not enought physical memory in the device to perform this reserve allocation"))
+			throw std::length_error(std::string("Error: Not enought physical memory in the device to perform this reserve allocation"));
 		curr_capacity = new_cap;
 		array_reserve();
 	}
 
 	/* Capacity */
 	template <class T, class Allocator>
-	vector<T, Allocator>::size_type				vector<T, Allocator>::capacity() const
+	typename vector<T, Allocator>::size_type	vector<T, Allocator>::capacity() const
 	{
 		return (curr_capacity);
 	}
@@ -417,7 +428,7 @@ namespace ft
 
 	/* Insert */
 	template <class T, class Allocator>
-	vector<T, Allocator>::iterator				vector<T, Allocator>::insert(iterator pos, const_reference value)
+	typename vector<T, Allocator>::iterator		vector<T, Allocator>::insert(iterator pos, const_reference value)
 	{
 		insert(pos, 1, value);
 	}
@@ -428,11 +439,7 @@ namespace ft
 	{
 		// Handle space
 		curr_size += count;
-		if (curr_size > curr_capacity)
-		{
-			curr_capacity = curr_size;
-			array_reserve();
-		}
+		array_resize();
 
 		// Calc the insertion index
 		iterator i = begin();
@@ -482,30 +489,30 @@ namespace ft
 			std::move(operator[](i), operator[](i + last - first));
 
 		// Insert the value at the insertion index (size of count)
-		for (size_type i = insertion_index ; i < insertion_index + ast - first ; i++)
+		for (size_type i = insertion_index ; i < insertion_index + last - first ; i++)
 		{
 			// TO DO: Check if i have to destroy here
-			memory.construct(&operator[](i), value);
+			//memory.construct(&operator[](i), value);
 		}
 	}
 
 	/* Erase */
 	template <class T, class Allocator>
-	vector<T, Allocator>::iterator				vector<T, Allocator>::erase(iterator pos)
+	typename vector<T, Allocator>::iterator		vector<T, Allocator>::erase(iterator pos)
 	{
 		erase(pos, pos + 1);
 	}
 
 	/* Erase */
 	template <class T, class Allocator>
-	vector<T, Allocator>::iterator				vector<T, Allocator>::erase(iterator first, iterator last)
+	typename vector<T, Allocator>::iterator		vector<T, Allocator>::erase(iterator first, iterator last)
 	{
 		size_type	_size  = last - first;
 
 		// Calc the deletion index
 		iterator i = begin();
 		size_type deletion_index = 0;
-		while (i != pos)
+		while (i != last)
 		{
 			i++;
 			deletion_index++;
@@ -528,7 +535,7 @@ namespace ft
 	{
 		curr_size++;
 		array_resize();
-		operator[](curr_size) = value_type;
+		operator[](curr_size - 1) = value;
 	}
 
 	/* Pop back */
@@ -541,7 +548,7 @@ namespace ft
 
 	/* Resize */
 	template <class T, class Allocator>
-	void										vector<T, Allocator>::resize(size_type count, value_type value = value_type())
+	void										vector<T, Allocator>::resize(size_type count, value_type value)
 	{
 		std::swap(curr_size, count);
 		array_resize();
@@ -567,7 +574,7 @@ namespace ft
 	{
 		if (lhs.size() == rhs.size())
 		{
-			for (auto i = 0ul ; i < lhs.size() < i++)
+			for (auto i = 0ul ; i < lhs.size() ; i++)
 				if (lhs.operator[](i) != rhs.operator[](i))
 					return (false);
 			return (true);
