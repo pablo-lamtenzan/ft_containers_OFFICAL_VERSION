@@ -6,7 +6,7 @@
 /*   By: pablo <pablo@student.42lyon.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/26 17:49:10 by pablo             #+#    #+#             */
-/*   Updated: 2020/12/27 17:08:41 by pablo            ###   ########lyon.fr   */
+/*   Updated: 2021/01/05 11:53:45 by pablo            ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,73 +41,85 @@ namespace ft
 		typedef std::bidirectional_iterator_tag	iterator_category;
 		
 		/* Iterator (current address in the array) */
-		private:
+		protected:
 		
-		pointer					curr;
+		pointer									it;
 
 		public:
 
 		/* Member functions */
 
-		reference							get_curr() const { return (curr); }
 
-		LegacyRandomAccessIterator() : curr(nullptr) { }
-		LegacyRandomAccessIterator(pointer ptr) : curr(ptr) { }
-		LegacyRandomAccessIterator(const LegacyRandomAccessIterator& other) : curr(other.get_curr()) { }
+		LegacyRandomAccessIterator() : it(nullptr) { }
+		LegacyRandomAccessIterator(pointer ptr) : it(ptr) { }
+		LegacyRandomAccessIterator(const LegacyRandomAccessIterator& other) : it(other.it) { }
 		~LegacyRandomAccessIterator() { }
 
 		/* Handle assignation */
-		LegacyRandomAccessIterator&			operator=(const LegacyRandomAccessIterator& other) { curr = other.get_curr(); return (*this); }
+		LegacyRandomAccessIterator&			operator=(const LegacyRandomAccessIterator& other) { it = other.it; return (*this); }
 		/* Handle address addition */
-		LegacyRandomAccessIterator			operator+(difference_type n) { return (LegacyRandomAccessIterator(curr + n)); }
+		LegacyRandomAccessIterator			operator+(difference_type n) { return (LegacyRandomAccessIterator(it + n)); }
 		/* Handle integer addition with no const iterator */
-		size_type							operator+(LegacyRandomAccessIterator& other) { return ((static_cast<uint64_t>(curr) + static_cast<uint64_t>(other.curr)) / sizeof (size_type); }
+		size_type							operator+(LegacyRandomAccessIterator& other) { return ((static_cast<uint64_t>(it) + static_cast<uint64_t>(other.it)) / sizeof (size_type)); }
 		/* Handle integer addtion with const iterator */
-		size_type							operator-(const LegacyRandomAccessIterator& other) { return ((static_cast<uint64_t>(curr) + static_cast<uint64_t>(other.curr)) / sizeof (size_type); }
+		size_type							operator+(const LegacyRandomAccessIterator& other) { return ((static_cast<uint64_t>(it) + static_cast<uint64_t>(other.it)) / sizeof (size_type)); }
 		/* Handle address substraction */
-		LegacyRandomAccessIterator			operator-(difference_type n) { return (LegacyRandomAccessIterator(curr - n)); }
+		LegacyRandomAccessIterator			operator-(difference_type n) { return (LegacyRandomAccessIterator(it - n)); }
 		/* Handle integer substraction with no const iterator */
-		size_type							operator-(LegacyRandomAccessIterator& other) { return ((static_cast<uint64_t>(curr) - static_cast<uint64_t>(other.curr)) / sizeof (size_type); }
+		size_type							operator-(LegacyRandomAccessIterator& other) { return ((static_cast<uint64_t>(it) - static_cast<uint64_t>(other.it)) / sizeof (size_type)); }
 		/* Handle integer substraction with const iterator */
-		size_type							operator-(const LegacyRandomAccessIterator& other) { return (static_cast<uint64_t>(curr) - static_cast<uint64_t>(other.curr) / sizeof (size_type); }
+		size_type							operator-(const LegacyRandomAccessIterator& other) { return (static_cast<uint64_t>(it) - static_cast<uint64_t>(other.it) / sizeof (size_type)); }
 		/* Handle self addition */
-		LegacyRandomAccessIterator			operator+=(difference_type n) { curr += n; return (*this); }
+		LegacyRandomAccessIterator			operator+=(difference_type n) { it += n; return (*this); }
 		/* Handle self substraction */
-		LegacyRandomAccessIterator			operator-=(difference_type n) { curr -= n; return (*this); }
+		LegacyRandomAccessIterator			operator-=(difference_type n) { it -= n; return (*this); }
 		/* Handle post-incrementation */
-		LegacyRandomAccessIterator			operator++(int) { LegacyRandomAccessIterator aux(curr); operator++(); return (aux); }
+		LegacyRandomAccessIterator			operator++(int) { LegacyRandomAccessIterator aux(it); operator++(); return (aux); }
 		/* Handle pre-incrementation */
-		LegacyRandomAccessIterator&			operator++() { curr++; return (*this); }
+		LegacyRandomAccessIterator&			operator++() { it++; return (*this); }
 		/* Handle post-decrementation */
-		LegacyRandomAccessIterator			operator--(int) { LegacyRandomAccessIterator aux(curr); operator--(); return (aux); }
+		LegacyRandomAccessIterator			operator--(int) { LegacyRandomAccessIterator aux(it); operator--(); return (aux); }
 		/* Handle pre-decrementation */
-		LegacyRandomAccessIterator&			operator--() { curr--; return (*this); }
+		LegacyRandomAccessIterator&			operator--() { it--; return (*this); }
 		/* Handle self dereference by pointer */
-		reference							operator*() { if (!curr) throw::std::out_of_range(std::string("Error: Out of bounds.")); return (*curr); }
-		const_reference						operator*() const { if (!curr) throw::std::out_of_range(std::string("Error: Out of bounds.")); return (*curr); }
+		reference							operator*() { if (!it) throw::std::out_of_range(std::string("Error: Out of bounds.")); return (*it); }
+		const_reference						operator*() const { if (!it) throw::std::out_of_range(std::string("Error: Out of bounds.")); return (*it); }
 		/* Handle pointing to self methods */
-		pointer								operator->() { return (curr); }
-		const_pointer						operator->() const { return (curr); }
+		pointer								operator->() { return (it); }
+		const_pointer						operator->() const { return (it); }
 		/* Handle self dereference by squared brackets */
-		reference							operator[](difference_type pos) { return (curr + pos); }
-		const_reference						operator[](difference_type pos) const { return (curr + pos); }
+		reference							operator[](difference_type pos) { return (it + pos); }
+		const_reference						operator[](difference_type pos) const { return (it + pos); }
 		/* Handle boolean equity */
-		template <class It1, class it2>
-		bool								operator==(const LegacyRandomAccessIterator<It1>& lhs, const LegacyRandomAccessIterator<It2>& rhs) { return (lhs.get_curr() == rhs.get_curr()); }
+		//template <class It1, class It2>
+		//bool								operator==(const LegacyRandomAccessIterator<It1>& lhs, const LegacyRandomAccessIterator<It2>& rhs) { return (lhs.it == rhs.it); }
 		/* Handle boolean inequity */
-		template <class It1, class it2>
-		bool								operator!=(const LegacyRandomAccessIterator<It1>& lhs, const LegacyRandomAccessIterator<It2>& rhs) { return (lhs.get_curr() != rhs.get_curr()); }
+		//template <class It1, class It2>
+		//bool								operator!=(const LegacyRandomAccessIterator<It1>& lhs, const LegacyRandomAccessIterator<It2>& rhs) { return (lhs.it != rhs.it); }
 		/* Handle boolean leeser */
-		template <class It1, class it2>
-		bool								operator<(const LegacyRandomAccessIterator<It1>& lhs, const LegacyRandomAccessIterator<It2>& rhs) { return (lhs.get_curr() < rhs.get_curr()); }
+		//template <class It1, class It2>
+		//bool								operator<(const LegacyRandomAccessIterator<It1>& lhs, const LegacyRandomAccessIterator<It2>& rhs) { return (lhs.it < rhs.it); }
 		/* Handle boolean leeser equity */
-		template <class It1, class it2>
-		bool								operator<=(const LegacyRandomAccessIterator<It1>& lhs, const LegacyRandomAccessIterator<It2>& rhs) { return (lhs.get_curr() <= rhs.get_curr()); }
+		//template <class It1, class It2>
+		//bool								operator<=(const LegacyRandomAccessIterator<It1>& lhs, const LegacyRandomAccessIterator<It2>& rhs) { return (lhs.it <= rhs.it); }
 		/* Hanlde boolean greather */
-		template <class It1, class it2>
-		bool								operator>(const LegacyRandomAccessIterator<It1>& lhs, const LegacyRandomAccessIterator<It2>& rhs) { return (lhs.get_curr() > rhs.get_curr()); }
+		//template <class It1, class It2>
+		//bool								operator>(const LegacyRandomAccessIterator<It1>& lhs, const LegacyRandomAccessIterator<It2>& rhs) { return (lhs.it > rhs.it); }
 		/* Handle boolean greather equity */
-		template <class It1, class it2>
-		bool								operator>=(const LegacyRandomAccessIterator<It1>& lhs, const LegacyRandomAccessIterator<It2>& rhs) { return (lhs.get_curr() >= rhs.get_curr()); }
+		//template <class It1, class It2>
+		//bool								operator>=(const LegacyRandomAccessIterator<It1>& lhs, const LegacyRandomAccessIterator<It2>& rhs) { return (lhs.it >= rhs.it); }
+
+		bool								operator==(const LegacyRandomAccessIterator& other) { return (it == other.it); }
+		/* Handle boolean inequity */
+		bool								operator!=( const LegacyRandomAccessIterator& other) { return (it != other.it); }
+		/* Handle boolean leeser */
+		bool								operator<(const LegacyRandomAccessIterator& other) { return (it < other.it); }
+		/* Handle boolean leeser equity */
+		bool								operator<=(const LegacyRandomAccessIterator& other) { return (it <= other.it); }
+		/* Hanlde boolean greather */
+		bool								operator>(const LegacyRandomAccessIterator& other) { return (it > other.it); }
+		/* Handle boolean greather equity */
+		bool								operator>=(const LegacyRandomAccessIterator& other) { return (it >= other.it); }
 	};
+
 };
