@@ -6,11 +6,12 @@
 /*   By: pablo <pablo@student.42lyon.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/27 19:24:05 by pablo             #+#    #+#             */
-/*   Updated: 2020/12/27 21:39:21 by pablo            ###   ########lyon.fr   */
+/*   Updated: 2021/01/05 09:40:31 by pablo            ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include <allocator.hpp>
+# include <LegacyBidirectionalIterator.hpp>
 # include <reverse_iterator.hpp>
 # include <lexicographical_compare.hpp>
 
@@ -26,6 +27,9 @@
 # define TAIL	nil->prev
 
 namespace ft
+
+// TO DO: Handle ressources in construct destructor
+// TO DO: Add an atribute --> curr_lenght
 {
 	template <class T, class Allocator = allocator<T>>
 	class list
@@ -40,23 +44,15 @@ namespace ft
 		typedef Allocator::pointer			pointer;
 		typedef Allocator::const_pointer	const_pointer;
 
-		// TO DO LegacyBidirectionalIterator
-		typedef T									iterator; // tmp
-		typedef T									const_iterator; // tmp
-		typedef	reverse_iterator<iterator>			reverse_iterator;
-		typedef reverse_iterator<const_iterator>	const_reverse_iterator;
+		typedef LegacyBidirectionalIterator<value_type>			iterator;
+		typedef LegacyBidirectionalIterator<const value_type>	const_iterator;
+		typedef	reverse_iterator<iterator>						reverse_iterator;
+		typedef reverse_iterator<const_iterator>				const_reverse_iterator;
 
 		protected:
 
 		/* Core */
 		
-		typedef struct		s_node
-		{
-			value_type		data;
-			struct s_node*	next;
-			struct s_node*	prev;
-		}					Node;
-
 		Allocator			memory;
 		Node*				lst;
 		Node*				NIL;
@@ -68,13 +64,13 @@ namespace ft
 		**
 		** Note: Call new_node wihout a NIL defined may cuases indefined behaviours.
 		*/
-		Node*				new_node(value_type d)
+		Node*				new_node(const_reference d = value_type())
 		{
 			Node*	node;
 			try {
-				node = memory.allocate(sizeof(*node));
+				node = Node(NIL, NIL, d);
 			} catch (std::bad_alloc& e) { if (lst != NIL) this->~list(); throw ; }
-			*node = (Node){.next=NIL, .prev=NIL};
+			lenght++;
 			return (node);
 		}
 
@@ -106,7 +102,7 @@ namespace ft
 		list() : memory(Allocator), lenght(0ul)
 		{
 			try {
-				NIL = memory.allocate(sizeof(*NIL));
+				NIL = Node();
 			} catch (const std::bad_alloc& e) { throw ; }
 			HEAD = NIL;
 			TAIL = NIL;
@@ -116,7 +112,7 @@ namespace ft
 		explicit list(const Allocator& alloc) : memory(alloc), lenght(0ul)
 		{
 			try {
-				NIL = memory.allocate(sizeof(*NIL));
+				NIL = Node();
 			} catch (const std::bad_alloc& e) { throw ; }
 			HEAD = NIL;
 			TAIL = NIL;
@@ -145,11 +141,8 @@ namespace ft
 		~list()
 		{
 			for (Node* i = HEAD ; i != NIL ; i = i->next)
-			{
 				memory.destroy(i);
-				memory.deallocate(i);
-			}
-			memory.deallocate(NIL);
+			memory.destroy(NIL);
 		}
 
 			/* Operator= */
@@ -285,7 +278,14 @@ namespace ft
 	template <class T, class Allocator>
 	list<T, Allocator>&						list<T, Allocator>::operator=(const list& other)
 	{
-		
+		if (this != &other)
+		{
+			memory = other.memory;
+			clear();
+			for (Node* i = other.HEAD ; i != other.NIL ; i = i->next)
+				push_back(i->data);
+		}
+		return (*this);
 	}
 	
 	/* Assign */
@@ -307,112 +307,116 @@ namespace ft
 	template <class T, class Allocator>
 	list<T, Allocator>::reference			list<T, Allocator>::front()
 	{
-		
+		return (HEAD);
 	}
 
 	/* Front */
 	template <class T, class Allocator>
 	list<T, Allocator>::const_reference		list<T, Allocator>::front() const
 	{
-		
+		return (HEAD);
 	}
 
 	/* Back */
 	template <class T, class Allocator>
 	list<T, Allocator>::reference			list<T, Allocator>::back()
 	{
-		
+		return (TAIL);
 	}
 	
 	/* Back */
 	template <class T, class Allocator>
 	list<T, Allocator>::const_reference			list<T, Allocator>::back() const
 	{
-		
+		return (TAIL);
 	}
 
 	/* Begin */
 	template <class T, class Allocator>
 	list<T, Allocator>::iterator				list<T, Allocator>::begin()
 	{
-		
+		return (iterator(front());)
 	}
 
 	/* Begin */
 	template <class T, class Allocator>
 	list<T, Allocator>::const_iterator				list<T, Allocator>::begin() const
 	{
-		
+		return (const_iterator(front()));
 	}
 
 	/* End */
 	template <class T, class Allocator>
 	list<T, Allocator>::iterator				list<T, Allocator>::end()
 	{
-		
+		return (iterator(back()));
 	}
 
 	/* End */
 	template <class T, class Allocator>
-	list<T, Allocator>::const_iterator			list<T, Allocator>::end()
+	list<T, Allocator>::const_iterator			list<T, Allocator>::end() const
 	{
-		
+		return (const_iterator(back()));
 	}
 
 	/* Rbegin */
 	template <class T, class Allocator>
 	list<T, Allocator>::reverse_iterator		list<T, Allocator>::rbegin()
 	{
-		
+		return (reverse_iterator(back()));
 	}
 
 	/* Rbegin */
 	template <class T, class Allocator>
 	list<T, Allocator>::const_reverse_iterator	list<T, Allocator>::rbegin() const
 	{
-		
+		return (const_reverse_iterator(back()));
 	}
 
 	/* Rend */
 	template <class T, class Allocator>
 	list<T, Allocator>::reverse_iterator		list<T, Allocator>::rend()
 	{
-		
+		return (reverse_iterator(front()));
 	}
 
 	/* Rend */
 	template <class T, class Allocator>
 	list<T, Allocator>::const_reverse_iterator	list<T, Allocator>::rend() const
 	{
-		
+		return (const_reverse_iterator(front()));
 	}
 
 	/* Empty */
 	template <class T, class Allocator>
 	bool										list<T, Allocator>::empty() const
 	{
-		
+		return (lenght == 0);
 	}
 
 	/* Size */
 	template <class T, class Allocator>
 	list<T, Allocator>::size_type				list<T, Allocator>::size() const
 	{
-		
+		return (lenght);
 	}
 
 	/* Max size */
 	template <class T, class Allocator>
 	list<T, Allocator>::size_type				list<T, Allocator>::max_size() const
 	{
-		
+		return (std::numeric_limits<difference_type>::max() / sizeof(Node));
 	}
 
 	/* Clear */
 	template <class T, class Allocator>
 	void										list<T, Allocator>::clear()
 	{
-
+		for (Node* i = HEAD ; i != NIL ; i = i->next)
+		{
+			unlink(i);
+			i->~Node();
+		}
 	}
 
 	/* Insert */
@@ -455,56 +459,75 @@ namespace ft
 	template <class T, class Allocator>
 	void										list<T, Allocator>::push_back(const_reference value)
 	{
-
+		Node* node = new_node(value);
+		link(node, TAIL, NIL);
+		TAIL = node;
 	}
 
 	/* Pop back */
 	template <class T, class Allocator>
 	void										list<T, Allocator>::pop_back()
 	{
-
+		Node* target = TAIL;
+		TAIL = TAIL->prev;
+		unlink(target);
+		link(TAIL, TAIL->prev, NIL);
+		target->~Node();
+		lenght--;
 	}
 
 	/* Push front */
 	template <class T, class Allocator>
 	void										list<T, Allocator>::push_front(const_reference value)
 	{
-
+		Node* node = new_node(value);
+		link(node, NIL, HEAD);
+		HEAD = node;
 	}
 
 	/* Pop front */
 	template <class T, class Allocator>
 	void										list<T, Allocator>::pop_front()
 	{
-
+		Node* target = HEAD;
+		HEAD = HEAD->next;
+		unlink(target);
+		link(HEAD, NIL, HEAD->next);
+		target->~Node();
+		lenght--;
 	}
 
 	/* Resize */
 	template <class T, class Allocator>
 	void										list<T, Allocator>::resize(size_type count)
 	{
-
+		// TO DO: Check if this are default-inserted elements 
+		resize(count);
 	}
 
 	/* Resize */
 	template <class T, class Allocator>
 	void										list<T, Allocator>::resize(size_type count, value_type value = value_type())
 	{
-
+		while (count--)
+			push_back(value);
 	}
 
 	/* Swap */
 	template <class T, class Allocator>
 	void										list<T, Allocator>::swap(list& other)
 	{
-
+		std::swap(memory, other.memory);
+		std::swap(lst, other.lst);
+		std::swap(NIL, other.NIL);
+		std::swap(lenght, other.lenght);
 	}
 
 	/* Merge */
 	template <class T, class Allocator>
 	void										list<T, Allocator>::merge(list& other)
 	{
-
+		// to do
 	}
 
 	/* Merge */
@@ -519,28 +542,58 @@ namespace ft
 	template <class T, class Allocator>
 	void										list<T, Allocator>::splice(const_iterator pos, list& other)
 	{
+		Node* start_insertion = HEAD;
 
+		// Get start insertion point // TO DO: Check for overflow ? 
+		while (pos-- < 0) // Check when stop!!!!
+			start_insertion = start_insertion->next;
+
+		// Get end insertion point
+		Node* end_insertion = start_insertion->next;
+
+		// Link the start
+		start_insertion->next = other.HEAD;
+		other.HEAD->next = start_insertion;
+
+		// Link the end
+		end_insertion->prev = other.TAIL;
+		other.TAIL->next = end_insertion;
+
+		// Resize
+		lenght += other.lenght;
+		other.lenght = 0;
+		
+		// Empty
+		other.TAIL = other.NIL;
+		other.HEAD = other.NIL;
 	}
 
 	/* Splice */
 	template <class T, class Allocator>
 	void										list<T, Allocator>::splice(const_iterator pos, list& other, const_iterator it)
 	{
-
+		// To do
 	}
 	
 	/* Splice */
 	template <class T, class Allocator>
 	void										list<T, Allocator>::splice(const_iterator pos, list& other, const_iterator first, const_iterator last)
 	{
-
+		// To do
 	}
 	
 	/* Remove */
 	template <class T, class Allocator>
 	void										list<T, Allocator>::remove(const_reference value)
 	{
-
+		for (Node* first = HEAD, first != NIL ; first = first->next)
+		{
+			if (first.data == value)
+			{
+				unlink(first);
+				first->~Node();
+			}
+		}
 	}
 
 	/* Remove if */
@@ -548,21 +601,65 @@ namespace ft
 	template <class UnaryPredicate>
 	void										list<T, Allocator>::remove_if(UnaryPredicate p)
 	{
-
+		for (Node* first = HEAD, first != NIL ; first = first->next)
+		{
+			if (p(first.data))
+			{
+				unlink(first);
+				first->~Node();
+			}
+		}
 	}
 
 	/* Reverse */
 	template <class T, class Allocator>
 	void										list<T, Allocator>::reverse()
 	{
+		// WHAT SHOULD I DO IF IS EMPTY
 
+		// lenght isn't pair add a node to make it pear
+		if (lenght % 2 == 0)
+		{
+			Node* tmp;
+			link(tmp, TAIL, NIL);
+		}
+
+		// Proceed to reverse
+		Node* rev = back();
+		for (Node* i = front() ; i != rev ;)
+		{
+			// Tmp for operate
+			Node* remember = rev;
+			Node* rem_i = i;
+
+			i = i->next;
+
+			// Swap nodes
+			unlink(rev);
+			link(rev, i->prev->next, i->next->prev);
+			unlink(rem_i);
+			link(rem_i, remember->prev->next, remember->next->prev);
+	
+			rev = rev->prev;
+		}
+		
+		// Remove to added node
+		if (lenght % 2 == 0)
+			pop_front();
+
+		// Swap Head and TAIL
+		unlink(HEAD);
+		unlink(TAIL);
+		link(HEAD, NIL, NIL->next);
+		link(TAIL, NIL->prev, NIL);
+		
 	}
 
 	/* Unique */
 	template <class T, class Allocator>
 	void										list<T, Allocator>::unique()
 	{
-
+		// rm all identical elems
 	}
 
 	/* Unique */
@@ -577,7 +674,7 @@ namespace ft
 	template <class T, class Allocator>
 	void										list<T, Allocator>::sort()
 	{
-
+		
 	}
 
 	/* Sort */
